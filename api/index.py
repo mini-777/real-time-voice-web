@@ -1,4 +1,4 @@
-from flask import Flask, render_template_string, request, jsonify
+from flask import Flask, Response, request, jsonify
 from flask_cors import CORS
 import json
 import re
@@ -6,7 +6,7 @@ import re
 app = Flask(__name__)
 CORS(app)
 
-HTML = """
+HTML = r"""
 <!DOCTYPE html>
 <html lang='ko'>
 <head>
@@ -20,7 +20,8 @@ HTML = """
 <body>
 <div id='root'></div>
 <script type='text/babel'>
-function App(){return (<h1 style={{textAlign:'center',marginTop:'40vh'}}>🎤 실시간 음성 인식 서버 준비 완료!</h1>);}ReactDOM.render(<App/>,document.getElementById('root'));</script>
+function App(){return React.createElement('h1', {style: {textAlign:'center', marginTop:'40vh'}}, '🎤 실시간 음성 인식 서버 준비 완료!');}
+ReactDOM.render(React.createElement(App),document.getElementById('root'));</script>
 </body>
 </html>
 """
@@ -28,7 +29,7 @@ function App(){return (<h1 style={{textAlign:'center',marginTop:'40vh'}}>🎤 �
 
 @app.route('/', methods=['GET'])
 def index():
-    return render_template_string(HTML)
+    return Response(HTML, mimetype='text/html')
 
 
 @app.route('/health')
