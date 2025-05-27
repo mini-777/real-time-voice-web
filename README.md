@@ -1,29 +1,27 @@
-# 🎤 실시간 음성 인식 앱 (Whisper + Flask + React)
+# 🎤 실시간 음성 인식 앱 (Flask + React + Web Speech API)
 
-OpenAI Whisper를 사용한 실시간 음성 인식 웹 애플리케이션입니다. Flask 백엔드와 React 프론트엔드로 구성되어 있으며, Vercel에서 서버리스 함수로 배포됩니다.
+브라우저의 Web Speech API를 활용한 실시간 음성 인식 웹 애플리케이션입니다. Flask 백엔드와 React 프론트엔드로 구성되어 있으며, Vercel에서 서버리스 함수로 배포됩니다.
 
 ## ✨ 주요 기능
 
-- 🎙️ **실시간 음성 녹음**: 브라우저의 MediaRecorder API 사용
-- 🧠 **AI 음성 인식**: OpenAI Whisper 모델을 통한 정확한 음성-텍스트 변환
-- 🌐 **다국어 지원**: Whisper의 다국어 인식 기능
+- 🎙️ **실시간 음성 인식**: 브라우저의 Web Speech API 사용
+- 🌐 **다국어 지원**: 한국어, 영어, 일본어, 중국어, 스페인어, 프랑스어
+- 📊 **텍스트 분석**: 단어 수, 문자 수, 문장 수 통계 제공
 - 📱 **반응형 디자인**: 모바일과 데스크톱 모두 지원
-- ⚡ **실시간 처리**: 빠른 음성 처리 및 결과 표시
+- ⚡ **실시간 처리**: 즉시 음성을 텍스트로 변환
 
 ## 🛠️ 기술 스택
 
 ### 백엔드
 
 - **Flask 3.0.3**: 웹 프레임워크
-- **OpenAI Whisper**: 음성 인식 AI 모델
-- **PyTorch**: 딥러닝 프레임워크
 - **Flask-CORS**: CORS 지원
 
 ### 프론트엔드
 
-- **React 18**: UI 라이브러리
+- **React 18**: UI 라이브러리 (CDN)
 - **Vanilla CSS**: 스타일링
-- **MediaRecorder API**: 음성 녹음
+- **Web Speech API**: 브라우저 내장 음성 인식
 
 ### 배포
 
@@ -52,15 +50,15 @@ vercel dev
 
 ## 📋 API 엔드포인트
 
-### `POST /transcribe`
+### `POST /process_text`
 
-음성 데이터를 받아 텍스트로 변환합니다.
+텍스트를 받아 분석 결과를 반환합니다.
 
 **요청 본문:**
 
 ```json
 {
-  "audio": "base64_encoded_audio_data"
+  "text": "분석할 텍스트"
 }
 ```
 
@@ -69,8 +67,13 @@ vercel dev
 ```json
 {
   "success": true,
-  "text": "인식된 텍스트",
-  "language": "ko"
+  "original_text": "분석할 텍스트",
+  "processed_text": "분석할 텍스트",
+  "statistics": {
+    "word_count": 2,
+    "char_count": 7,
+    "sentence_count": 0
+  }
 }
 ```
 
@@ -83,33 +86,19 @@ vercel dev
 ```json
 {
   "status": "healthy",
-  "model": "whisper-base"
+  "service": "voice-recognition"
 }
 ```
 
 ## 🎯 사용 방법
 
 1. 웹 페이지에 접속
-2. 마이크 권한 허용
-3. 🎤 녹음 버튼 클릭하여 음성 녹음 시작
-4. ⏹️ 중지 버튼 클릭하여 녹음 종료
-5. AI가 음성을 텍스트로 변환하여 결과 표시
-
-## 🔧 설정
-
-### Whisper 모델 변경
-
-`api/index.py`에서 모델을 변경할 수 있습니다:
-
-```python
-# 더 정확하지만 느린 모델
-model = whisper.load_model("large")
-
-# 더 빠르지만 덜 정확한 모델
-model = whisper.load_model("tiny")
-```
-
-사용 가능한 모델: `tiny`, `base`, `small`, `medium`, `large`
+2. 언어 선택 (한국어, 영어 등)
+3. 마이크 권한 허용
+4. 🎤 시작 버튼 클릭하여 음성 인식 시작
+5. 음성으로 말하기
+6. ⏹️ 중지 버튼으로 종료
+7. 인식된 텍스트와 통계 확인
 
 ## 📦 배포
 
@@ -123,9 +112,18 @@ vercel --prod
 
 ## 🔒 보안 고려사항
 
-- 음성 데이터는 임시 파일로만 저장되며 처리 후 즉시 삭제됩니다
+- 음성 인식은 브라우저에서 직접 처리되어 서버로 전송되지 않습니다
 - CORS가 활성화되어 있어 브라우저에서 안전하게 접근 가능합니다
 - 마이크 권한은 사용자가 명시적으로 허용해야 합니다
+
+## 🌐 브라우저 호환성
+
+- **Chrome**: 완전 지원 ✅
+- **Edge**: 완전 지원 ✅
+- **Safari**: 부분 지원 ⚠️
+- **Firefox**: 제한적 지원 ⚠️
+
+**권장**: Chrome 또는 Edge 브라우저 사용
 
 ## 🐛 문제 해결
 
@@ -138,6 +136,18 @@ vercel --prod
 
 - 조용한 환경에서 명확하게 발음하세요
 - 인터넷 연결 상태를 확인하세요
+- Chrome 브라우저를 사용해보세요
+
+### 배포 오류
+
+```bash
+# Vercel 재로그인
+vercel logout
+vercel login
+
+# 다시 배포
+vercel --prod
+```
 
 ## 📄 라이선스
 
